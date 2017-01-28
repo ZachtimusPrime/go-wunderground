@@ -60,7 +60,6 @@ type wundergroundClient struct {
 	URL        string
 }
 
-
 // NewClient instantiates a new client to the Wunderground weather API. Instantiating a new client requires the
 // state abbreviation and city name for weather data from a city, as well as a personal API key which can be obtained
 // for free by registering at https://www.wunderground.com/signup?mode=api_signup
