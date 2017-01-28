@@ -12,16 +12,18 @@ import (
 )
 
 // current_observation holds all the weather information, as last updated, when a request is made for the weather
-type current_observation struct {
-	Weather weather_response `json:"current_observation"`
+type currentObservation struct {
+	Weather weatherResponse `json:"current_observation"`
 }
 
-type weather_response struct {
+// weatherResponse breaks all the weather stats into logical groupings (i.e. location data, temperature data, wind data etc.)
+type weatherResponse struct {
 	Location location `json:"display_location"`
 	*wind
 	*temperature
 }
 
+// location holds all the locational data
 type location struct {
 	Full           string `json:"full"`
 	City           string `json:"city"`
@@ -35,6 +37,7 @@ type location struct {
 	Elevation      string `json:"elevation"`
 }
 
+// wind holds all the data relating to wind speeds and direction
 type wind struct {
 	Description string  `json:"wind_string"`
 	Direction   string  `json:"wind_dir"`
@@ -45,18 +48,23 @@ type wind struct {
 	GustKPH     string  `json:"wind_gust_kph"`
 }
 
+// temperature holds all the temperature data
 type temperature struct {
 	TempString string  `json:"temperature_string"`
 	Fahrenheit float32 `json:"temp_f"`
-	Celcius    float32 `json:"temp_c"`
+	Celsius    float32 `json:"temp_c"`
 }
 
-type WundergroundClient struct {
+type wundergroundClient struct {
 	HTTPClient *http.Client // HTTP client used to communicate with the API
 	URL        string
 }
 
-func NewClient(httpClient *http.Client, State string, City string, APIKey string) *WundergroundClient {
+
+// NewClient instantiates a new client to the Wunderground weather API. Instantiating a new client requires the
+// state abbreviation and city name for weather data from a city, as well as a personal API key which can be obtained
+// for free by registering at https://www.wunderground.com/signup?mode=api_signup
+func NewClient(httpClient *http.Client, State string, City string, APIKey string) *wundergroundClient {
 	// Create a new client
 	if httpClient == nil {
 		tr := &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}} // turn off certificate checking
@@ -66,17 +74,13 @@ func NewClient(httpClient *http.Client, State string, City string, APIKey string
 	url := "http://api.wunderground.com/api/" + APIKey + "/conditions/q/" + State + "/" + City + ".json"
 	fmt.Print(url)
 
-	c := &WundergroundClient{HTTPClient: httpClient, URL: url}
+	c := &wundergroundClient{HTTPClient: httpClient, URL: url}
 
 	return c
 }
 
-// Client.Log is used to construct a new log event and POST it to the Splunk server.
-//
-// All that must be provided for a log event are the desired map[string]string key/val pairs. These can be anything
-// that provide context or information for the situation you are trying to log (i.e. err messages, status codes, etc).
-// The function auto-generates the event timestamp and hostname for you.
-func (c *WundergroundClient) GetWeather() (current_observation, error) {
+// GetWeather is used to obtain weather data from the city specified during client instantiation.
+func (c *wundergroundClient) GetWeather() (currentObservation, error) {
 
 	// make new request
 	req, err := http.NewRequest("GET", c.URL, nil)
@@ -85,19 +89,19 @@ func (c *WundergroundClient) GetWeather() (current_observation, error) {
 	// receive response
 	res, err := c.HTTPClient.Do(req)
 	if err != nil {
-		return current_observation{}, err
+		return currentObservation{}, err
 	}
 
+	// read the body to bytes for un-marshalling
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		return current_observation{}, err
+		return currentObservation{}, err
 	}
 
 	// If statusCode is not good, return error string
-
 	switch res.StatusCode {
 	case 200:
-		response := current_observation{}
+		response := currentObservation{}
 		json.Unmarshal(body, &response)
 		return response, nil
 	default:
@@ -108,6 +112,6 @@ func (c *WundergroundClient) GetWeather() (current_observation, error) {
 		err = errors.New(responseBody)
 		//log.Print(responseBody)	// print error to screen for checking/debugging
 
-		return current_observation{}, err
+		return currentObservation{}, err
 	}
 }
