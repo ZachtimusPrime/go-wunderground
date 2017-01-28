@@ -55,7 +55,11 @@ type temperature struct {
 	Celsius    float32 `json:"temp_c"`
 }
 
-type wundergroundClient struct {
+// client manages communication with the Wunderground weather API.
+// New client objects should be created using the NewClient function.
+//
+// The URL field is populated by the parameters supplied to NewClient.
+type client struct {
 	HTTPClient *http.Client // HTTP client used to communicate with the API
 	URL        string
 }
@@ -63,7 +67,7 @@ type wundergroundClient struct {
 // NewClient instantiates a new client to the Wunderground weather API. Instantiating a new client requires the
 // state abbreviation and city name for weather data from a city, as well as a personal API key which can be obtained
 // for free by registering at https://www.wunderground.com/signup?mode=api_signup
-func NewClient(httpClient *http.Client, State string, City string, APIKey string) *wundergroundClient {
+func NewClient(httpClient *http.Client, State string, City string, APIKey string) *client {
 	// Create a new client
 	if httpClient == nil {
 		tr := &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}} // turn off certificate checking
@@ -73,13 +77,13 @@ func NewClient(httpClient *http.Client, State string, City string, APIKey string
 	url := "http://api.wunderground.com/api/" + APIKey + "/conditions/q/" + State + "/" + City + ".json"
 	fmt.Print(url)
 
-	c := &wundergroundClient{HTTPClient: httpClient, URL: url}
+	c := &client{HTTPClient: httpClient, URL: url}
 
 	return c
 }
 
 // GetWeather is used to obtain weather data from the city specified during client instantiation.
-func (c *wundergroundClient) GetWeather() (currentObservation, error) {
+func (c *client) GetWeather() (currentObservation, error) {
 
 	// make new request
 	req, err := http.NewRequest("GET", c.URL, nil)
