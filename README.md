@@ -2,6 +2,8 @@
 A go package for interacting with the Wunderground weather API.
 
 [![GoDoc](https://godoc.org/github.com/ZachtimusPrime/go-wunderground/wunderground?status.svg)](https://godoc.org/github.com/ZachtimusPrime/go-wunderground/wunderground)
+[![Build Status](https://travis-ci.org/ZachtimusPrime/go-wunderground.svg?branch=master)](https://travis-ci.org/ZachtimusPrime/go-wunderground)
+[![Coverage Status](https://coveralls.io/repos/github/ZachtimusPrime/go-wunderground/badge.svg?branch=master)](https://coveralls.io/github/ZachtimusPrime/go-wunderground?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/ZachtimusPrime/go-wunderground)](https://goreportcard.com/report/github.com/ZachtimusPrime/go-wunderground)
 
 ## Table of Contents ##
